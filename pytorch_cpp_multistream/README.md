@@ -11,7 +11,7 @@
 nsys profile -w true -t cuda,nvtx,osrt,cudnn,cublas -s none -o <output> -f true --cudabacktrace=true -x true ./build/run_model
 ```
 
-## Profile torchscript using nsight-sys
+## Profile torchscript using nvprof
 ```
 nvprof -fo <output.nvvp> -- ./build/run_model`
 ```
