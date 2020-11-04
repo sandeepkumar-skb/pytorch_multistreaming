@@ -1,0 +1,7 @@
+*.pth
+*.nvvp
+*.qdrep
+build/
+dist/
+cpp_extensions.egg-info/
+__pycache__/
