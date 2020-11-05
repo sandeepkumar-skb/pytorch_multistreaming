@@ -14,5 +14,5 @@ nsys profile -w true -t cuda,nvtx,osrt,cudnn,cublas -s none -o <output> -f true 
 
 ## Profile torchscript using nvprof
 ```
-nvprof -fo <output.nvvp> -- ./build/run_model`
+nvprof -fo <output.nvvp> -- ./build/run_model
 ```
