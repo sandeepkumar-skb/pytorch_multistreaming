@@ -73,6 +73,7 @@ int main(){
         thread1.join();
         thread2.join();
         */
+        v.emplace_back(launch_kernel, std::ref(torch_stream1), std::ref(model1), std::ref(inputs));
         v.emplace_back(launch_kernel, std::ref(torch_stream2), std::ref(model2), std::ref(inputs));
     }
     for (auto& t : v){
