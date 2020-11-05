@@ -1,6 +1,7 @@
 ## To compile the torchscript:
 1. Update the source file in `CMakefile.txt`
 2. `./run_build.sh`
+RUN: `./build/run_model`
 
 ## To build torchscript as pytorch extension and import into PyTorch python API:
 1. `python setup.py install` - builds and packages plugin
