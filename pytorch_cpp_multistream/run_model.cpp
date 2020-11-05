@@ -21,12 +21,18 @@ int launch(std::shared_ptr<at::cuda::CUDAStream> stream, std::shared_ptr<torch::
 int main(){
     torch::jit::script::Module model1;
     torch::jit::script::Module model2;
+    torch::jit::script::Module model3;
+    torch::jit::script::Module model4;
     try {
         // Deserialize the ScriptModule from a file using torch::jit::load().
         model1 = torch::jit::load("./seq_block.pth");
         model2 = torch::jit::load("./seq_block.pth");
+        model3 = torch::jit::load("./seq_block.pth");
+        model4 = torch::jit::load("./seq_block.pth");
         model1.eval();
         model2.eval();
+        model3.eval();
+        model4.eval();
     }
     catch (const c10::Error& e) {
         std::cerr << "error loading the model\n";
@@ -43,9 +49,13 @@ int main(){
     //auto inputs = std::make_shared<std::vector<torch::jit::IValue>>(in);
     model1.to(at::kCUDA);
     model2.to(at::kCUDA);
+    model3.to(at::kCUDA);
+    model4.to(at::kCUDA);
 
     at::cuda::CUDAStream torch_stream1 = at::cuda::getStreamFromPool();
     at::cuda::CUDAStream torch_stream2 = at::cuda::getStreamFromPool();
+    at::cuda::CUDAStream torch_stream3 = at::cuda::getStreamFromPool();
+    at::cuda::CUDAStream torch_stream4 = at::cuda::getStreamFromPool();
 
     // Warm UP
     for(int i=0; i<50; ++i){
@@ -57,6 +67,14 @@ int main(){
         at::cuda::CUDAStreamGuard torch_guard2(torch_stream2);
         model2.forward(inputs).toTensor();
         }
+        {
+            at::cuda::CUDAStreamGuard torch_guard3(torch_stream3);
+            model3.forward(inputs).toTensor();
+        }
+        {
+            at::cuda::CUDAStreamGuard torch_guard4(torch_stream4);
+            model4.forward(inputs).toTensor();
+        }
     }
     cudaDeviceSynchronize();
 
@@ -64,21 +82,30 @@ int main(){
     std::chrono::high_resolution_clock::time_point end ;
     std::chrono::duration<double> span;
     start = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<1000; ++i){
-      {
+    int num_iter = 1000;
+    for(int i=0; i<num_iter; ++i){
+        {
             at::cuda::CUDAStreamGuard torch_guard1(torch_stream1);
             model1.forward(inputs).toTensor();
-       }
-       {
+        }
+        {
             at::cuda::CUDAStreamGuard torch_guard2(torch_stream2);
             model2.forward(inputs).toTensor();
-       }
+        }
+        {
+            at::cuda::CUDAStreamGuard torch_guard3(torch_stream3);
+            model3.forward(inputs).toTensor();
+        }
+        {
+            at::cuda::CUDAStreamGuard torch_guard4(torch_stream4);
+            model4.forward(inputs).toTensor();
+        }
     }
     cudaDeviceSynchronize();
 
     end = std::chrono::high_resolution_clock::now();
     span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-    std::cout << "Total time: " << span.count()*1000 << "ms" << std::endl;
+    std::cout << "Total time: " << (span.count()*1000)/num_iter << "ms" << std::endl;
 
     std::cout << "ok\n";
 }

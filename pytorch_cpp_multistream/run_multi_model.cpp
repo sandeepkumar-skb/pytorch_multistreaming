@@ -31,7 +31,7 @@ int main(){
         return -1;
     }
     std::vector<torch::jit::script::Module>  sub_model;
-    std::unordered_set<std::string> module_names {"block1", "block2"};
+    std::unordered_set<std::string> module_names {"block1", "block2", "block3", "block4"};
     for (auto it : model.named_modules()){
         if (module_names.count(it.name) != 0){
             std::cout << "Found " << it.name << std::endl;
@@ -61,7 +61,8 @@ int main(){
     std::chrono::high_resolution_clock::time_point end ;
     std::chrono::duration<double> span;
     start = std::chrono::high_resolution_clock::now();
-    for(int iter=0; iter<50; ++iter){
+    int num_iter = 1000;
+    for(int iter=0; iter<num_iter; ++iter){
         for (int model_id=0; model_id< sub_model.size(); ++model_id){
             at::cuda::CUDAStreamGuard guard(cuda_streams[model_id]);
             sub_model[model_id].forward(inputs).toTensor();
@@ -71,7 +72,7 @@ int main(){
 
     end = std::chrono::high_resolution_clock::now();
     span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-    std::cout << "Total time: " << span.count()*1000 << "ms" << std::endl;
+    std::cout << "Time per Iter: " << (span.count()*1000)/num_iter << "ms" << std::endl;
     std::cout << "ok\n";
 }
 

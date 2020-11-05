@@ -15,11 +15,15 @@ class Net(nn.Module):
         super().__init__()
         self.block1 = Block(features, 10)
         self.block2 = Block(features, 10)
+        self.block3 = Block(features, 10)
+        self.block4 = Block(features, 10)
     
     def forward(self, inp):
         out1 = self.block1(inp)
         out2 = self.block2(inp)
-        return out1 + out2
+        out3 = self.block3(inp)
+        out4 = self.block4(inp)
+        return (out1 + out2 + out3 + out4)
 
 
 
