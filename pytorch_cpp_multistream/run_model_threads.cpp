@@ -75,9 +75,9 @@ int main(){
         */
         v.emplace_back(launch_kernel, std::ref(torch_stream1), std::ref(model1), std::ref(inputs));
         v.emplace_back(launch_kernel, std::ref(torch_stream2), std::ref(model2), std::ref(inputs));
-    }
-    for (auto& t : v){
-        t.join();
+        for (auto& t : v){
+            t.join();
+        }
     }
     cudaDeviceSynchronize();
     end = std::chrono::high_resolution_clock::now();
