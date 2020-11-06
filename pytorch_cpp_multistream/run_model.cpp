@@ -38,7 +38,8 @@ int main(){
     tensor_options = tensor_options.device(c10::kCUDA);
     std::vector<torch::jit::IValue> inputs;
     //inputs.push_back(torch::ones({1, 3, 224, 224}, tensor_options));
-    inputs.push_back(torch::ones({512, 512}, tensor_options));
+    //inputs.push_back(torch::ones({512, 512}, tensor_options));
+    inputs.push_back(torch::ones({64, 64}, tensor_options));
     //in.push_back(torch::ones({10, 10}, tensor_options));
     //auto inputs = std::make_shared<std::vector<torch::jit::IValue>>(in);
     model1.to(at::kCUDA);
@@ -59,27 +60,27 @@ int main(){
         }
     }
     cudaDeviceSynchronize();
-
     std::chrono::high_resolution_clock::time_point start;
     std::chrono::high_resolution_clock::time_point end ;
     std::chrono::duration<double> span;
+
+    int num_iter = 1;
     start = std::chrono::high_resolution_clock::now();
-    for(int i=0; i<1000; ++i){
-      {
+    for(int i=0; i<num_iter; ++i){
+       {
             at::cuda::CUDAStreamGuard torch_guard1(torch_stream1);
-            model1.forward(inputs).toTensor();
+            auto out1 = model1.forward(inputs).toTensor();
        }
        {
             at::cuda::CUDAStreamGuard torch_guard2(torch_stream2);
-            model2.forward(inputs).toTensor();
+            auto out2 = model2.forward(inputs).toTensor();
        }
     }
     cudaDeviceSynchronize();
 
     end = std::chrono::high_resolution_clock::now();
     span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
-    std::cout << "Total time: " << span.count()*1000 << "ms" << std::endl;
-
+    std::cout << "Time per Iteration: " << (span.count()*1000)/num_iter << "ms" << std::endl;
     std::cout << "ok\n";
 }
 
