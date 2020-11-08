@@ -1,0 +1,3 @@
+[submodule "pytorch_cpp_multistream/pytorch_cpp_multistream/external/tbb"]
+	path = pytorch_cpp_multistream/pytorch_cpp_multistream/external/tbb
+	url = git@github.com:wjakob/tbb.git
