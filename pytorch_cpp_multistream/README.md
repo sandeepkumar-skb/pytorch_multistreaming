@@ -21,4 +21,4 @@ nvprof -fo <output.nvvp> -- ./build/run_model
 1. c++ threads - performance is worse than no threads. Thread creation and deletion is huge overheads.
 2. p_threads with priority set - this is unfeasible in most places because setting the priority requires `sudo` priviledges
 3. open_mp thread - this works really well, used the open_mp thread pool. Just using raw threads has overhead of creating and destroying threads.
-4. tbb thread_pool - this works equally well as open_mp thread_pool.
+4. tbb thread_pool - this works equally well as open_mp thread_pool. Downside is requires too much effort to build with CMake. Check the recipe in the tbb branch.
