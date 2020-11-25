@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import argparse
+from typing import Dict
 torch.ops.load_library("build/libplugins.so")
 
 class Block(nn.Module):
@@ -18,14 +19,16 @@ class Net(nn.Module):
         self.block1 = Block(features, 10)
         self.block2 = Block(features, 10)
     
-    def forward(self, inp):
-        out1 = self.block1(inp)
-        out2 = self.block2(inp)
+    def forward(self, inputs : Dict[str, torch.Tensor]):
+        inp1 = inputs['inp1']
+        inp2 = inputs['inp2']
+        out1 = self.block1(inp1)
+        out2 = self.block2(inp2)
         return out1 + out2
 
     @torch.jit.export
-    def forward_plugin(self, inp):
-        out1, out2 = torch.ops.plugins.multi_launch(inp)
+    def forward_plugin(self, inputs: Dict[str, torch.Tensor]):
+        out1, out2 = torch.ops.plugins.multi_launch(inputs)
         return out1 + out2
 
 
@@ -38,6 +41,9 @@ if __name__ == "__main__":
     use_plugin = args.use_plugin
 
     inp = torch.randn((512,512), device="cuda")
+    inputs = {}
+    inputs['inp1'] = inp
+    inputs['inp2'] = inp
     net = Net(512)
     net.cuda().eval()
 
@@ -45,9 +51,9 @@ if __name__ == "__main__":
         print("Jitting the model")
         net = torch.jit.script(net)
     if use_plugin:
-        net.forward_plugin(inp)
+        net.forward_plugin(inputs)
     else:
-        net(inp)
+        net(inputs)
 
     #torch.jit.save(net, "seq_multi_block.pth")
 
