@@ -26,7 +26,7 @@ class Net(nn.Module):
         out2 = self.block2(inp2)
         return out1 + out2
 
-    #@torch.jit.export
+    @torch.jit.export
     def forward_plugin(self, inputs: Dict[str, torch.Tensor]):
         out1, out2 = torch.ops.plugins.multi_launch(inputs)
         return out1 + out2
