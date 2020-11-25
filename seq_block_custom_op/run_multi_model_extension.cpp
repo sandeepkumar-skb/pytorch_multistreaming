@@ -6,9 +6,10 @@
 #include <memory>
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <future>
 
-std::vector<at::Tensor> d_multi_launch(at::Tensor input_tensor){
+std::vector<at::Tensor> d_multi_launch(torch::Dict<std::string, torch::Tensor> input_tensor){
     std::chrono::high_resolution_clock::time_point start;
     std::chrono::high_resolution_clock::time_point end ;
     std::chrono::duration<double> span;
@@ -34,10 +35,12 @@ std::vector<at::Tensor> d_multi_launch(at::Tensor input_tensor){
     at::TensorOptions tensor_options;
     tensor_options = tensor_options.dtype(c10::kFloat);
     tensor_options = tensor_options.device(c10::kCUDA);
-    std::vector<torch::jit::IValue> inputs;
+    std::vector<std::vector<torch::jit::IValue>> inputs;
     std::vector<at::Tensor> outputs;
-    //inputs.push_back(input_tensor.to(tensor_options));
-    inputs.push_back(input_tensor);
+    torch::Tensor inp1 = input_tensor.at("inp1");
+    torch::Tensor inp2 = input_tensor.at("inp1");
+    inputs.push_back(std::vector<torch::jit::IValue> {inp1});
+    inputs.push_back(std::vector<torch::jit::IValue> {inp2});
 
     std::vector<at::cuda::CUDAStream> cuda_streams;
     for (int i=0; i < sub_model.size(); ++i){
@@ -46,7 +49,7 @@ std::vector<at::Tensor> d_multi_launch(at::Tensor input_tensor){
 
     for (int model_id=0; model_id< sub_model.size(); ++model_id){
         at::cuda::CUDAStreamGuard guard(cuda_streams[model_id]);
-        outputs.push_back(sub_model[model_id].forward(inputs).toTensor());
+        outputs.push_back(sub_model[model_id].forward(inputs[model_id]).toTensor());
     }
     cudaDeviceSynchronize();
     end = std::chrono::high_resolution_clock::now();
