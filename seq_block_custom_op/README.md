@@ -1,9 +1,9 @@
 ### Introduction
- We have a model which has 2 submodels that can be launched on different CUDA Streams. Since can launch the submodels on different CUDA streams using the Python API (context manager) but
- this is not feasible because we want to deploy using TorchScript. Python context manager to launch on different streams are currently not exportable.
- So, here we are doing the following things:
- 1. Exporting the model to .pth file
- 2. Creating a Custom Op to load the .pth file, extract the submodels and launch them on different CUDA streams. It will then return the output tensor.
+Our model has 2 submodels that can be launched on different CUDA Streams to improve the performance. We can launch the submodels on different CUDA streams using the Python API (context manager) but this is not exportable to TorchScript which is importing for serving(inference). So, the approach here is to create a custom op to launch the submodules on separate streams in C++/TorchScript and then use those custom-op as plugins in the original model.
+ 
+**Steps:**
+ 1. Export the model to .pth file
+ 2. Create a Custom Op to load the .pth file, extract the submodels and launch them on different CUDA streams. Return the output tensor.
  3. This OP is then converted to a torch library using CMake.
  4. This library is loaded into the original model and will used instead of the raw python submodels.
- 5. Advantage of creating this into a library is that this is now exportable. If we have created a C++ extension in `pytorch_cpp_multistream` experiments, then we wouldn't be able to export the model.
+ 5. Using custom op library allows the model to be exportable with the plugins. If we have created a C++ extension as demo'ed [pytorch_cpp_multistream](https://github.com/sandeepkumar-skb/pytorch_multistreaming/tree/main/pytorch_cpp_multistream) experiments, then we will not be able export the model.
