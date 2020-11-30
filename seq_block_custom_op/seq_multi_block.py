@@ -19,14 +19,19 @@ class Net(nn.Module):
         self.block1 = Block(features, 10)
         self.block2 = Block(features, 10)
     
-    def forward(self, inputs : Dict[str, torch.Tensor]):
+    def forward(self, use_plugin : bool, inputs : Dict[str, torch.Tensor]):
+        if use_plugin:
+            self.forward_plugin(inputs)
+        else:
+            self.forward_noplugin(inputs)
+
+    def forward_noplugin(self, inputs : Dict[str, torch.Tensor]):
         inp1 = inputs['inp1']
         inp2 = inputs['inp2']
         out1 = self.block1(inp1)
         out2 = self.block2(inp2)
         return out1 + out2
 
-    @torch.jit.export
     def forward_plugin(self, inputs: Dict[str, torch.Tensor]):
         out1, out2 = torch.ops.plugins.multi_launch(inputs)
         return out1 + out2
@@ -50,12 +55,12 @@ if __name__ == "__main__":
     if export_jit:
         print("Jitting the model")
         net = torch.jit.script(net)
-    if use_plugin:
-        net.forward_plugin(inputs)
-    else:
-        net(inputs)
+        print("Saving the model")
+        torch.jit.save(net, "seq_multi_block.pth")
 
-    #torch.jit.save(net, "seq_multi_block.pth")
+    print("Running Network with plugin: ", use_plugin)
+    net(use_plugin, inputs)
+
 
     ### Profiling Start
     '''
@@ -72,7 +77,7 @@ if __name__ == "__main__":
 
     ### Load jitted module and print named_modules
     '''
-    module = torch.jit.load("./seq_block.pth")
+    module = torch.jit.load("./seq_multi_block.pth")
     for name,_ in module.named_modules():
         print(name)
     '''
