@@ -10,8 +10,6 @@
 #include <future>
 #include <torch/custom_class.h>
 
-//std::vector<at::Tensor> d_multi_launch(torch::Dict<std::string, torch::Tensor> input_tensor){
-//std::vector<at::Tensor> d_multi_launch(std::vector<torch::Tensor> input_tensor){
 struct MyLaunchClass : torch::CustomClassHolder {
     torch::jit::script::Module model;
     std::vector<torch::jit::script::Module>  sub_model;
@@ -48,9 +46,6 @@ struct MyLaunchClass : torch::CustomClassHolder {
         tensor_options = tensor_options.dtype(c10::kFloat);
         tensor_options = tensor_options.device(c10::kCUDA);
         std::vector<std::vector<torch::jit::IValue>> inputs;
-       // std::vector<torch::IValue>& tuple_elements = input_tensor->toTuple().elements();
-        //torch::Tensor inp1 = inp[0];
-        //torch::Tensor inp2 = inp[1];
         inputs.push_back(std::vector<torch::jit::IValue> {inp1});
         inputs.push_back(std::vector<torch::jit::IValue> {inp2});
         std::vector<at::Tensor> outputs;
