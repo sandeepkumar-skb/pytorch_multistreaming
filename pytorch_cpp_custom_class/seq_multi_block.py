@@ -25,7 +25,7 @@ class Net(nn.Module):
     def __init__(self, features, use_plugin):
         super().__init__()
         if use_plugin:
-            self.plugin_class = torch.classes.plugin_class.MyLaunchClass("./seq_multi_block_wo_plugin.pth")
+            self.plugin_class = torch.classes.plugin_class.MyLaunchClass("./seq_multi_block_no_plugin.pth")
         else:
             self.plugin_class = torch.classes.plugin_class.MyLaunchClass("");
         self.use_plugin = use_plugin
