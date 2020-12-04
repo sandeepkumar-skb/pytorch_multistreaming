@@ -17,6 +17,7 @@ struct MyLaunchClass : torch::CustomClassHolder {
     std::vector<torch::jit::script::Module>  sub_model;
     std::string path;
     MyLaunchClass(std::string path) : path{path} {
+        if (path.size() == 0) return ;
         try {
             // Deserialize the ScriptModule from a file using torch::jit::load().
             std::cout << "Trying to load the model from path: " << path << std::endl;
@@ -36,7 +37,7 @@ struct MyLaunchClass : torch::CustomClassHolder {
         }
 
     }
-    
+
     std::vector<at::Tensor> d_multi_launch(torch::Tensor inp1, torch::Tensor inp2)
     {
         std::chrono::high_resolution_clock::time_point start;

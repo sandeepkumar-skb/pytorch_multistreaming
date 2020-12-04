@@ -22,14 +22,18 @@ class Block(nn.Module):
         return self.fc_block(inp)
 
 class Net(nn.Module):
-    def __init__(self, features):
+    def __init__(self, features, use_plugin):
         super().__init__()
-        self.plugin_class = torch.classes.plugin_class.MyLaunchClass("./seq_multi_block_no_plugin.pth")
+        if use_plugin:
+            self.plugin_class = torch.classes.plugin_class.MyLaunchClass("./seq_multi_block_wo_plugin.pth")
+        else:
+            self.plugin_class = torch.classes.plugin_class.MyLaunchClass("");
+        self.use_plugin = use_plugin
         self.block1 = Block(features, 10)
         self.block2 = Block(features, 10)
     
-    def forward(self, use_plugin : bool, inputs : ModelInputs):
-        if use_plugin:
+    def forward(self, inputs : ModelInputs):
+        if self.use_plugin:
             return self.forward_plugin(inputs)
         else:
             return self.forward_noplugin(inputs)
@@ -57,21 +61,25 @@ if __name__ == "__main__":
     inp = torch.randn((512,512), device="cuda")
     inputs = ModelInputs(inp1 = inp,
                         inp2 = inp)
-    net = Net(512)
+    net = Net(512, use_plugin)
     net.cuda().eval()
 
     if export_jit:
         print("Jitting the model")
         net = torch.jit.script(net)
-        print("Saving the model")
-        torch.jit.save(net, "seq_multi_block_w_plugin.pth")
-        net2 = torch.jit.load("seq_multi_block_w_plugin.pth")
-        net2(True, inputs)
+        if use_plugin:
+            print("Saving the model: seq_multi_block_w_plugin.pth")
+            torch.jit.save(net, "seq_multi_block_w_plugin.pth")
+            net = torch.jit.load("./seq_multi_block_w_plugin.pth")
+        else:
+            print("Saving the model: seq_multi_block_no_plugin.pth")
+            torch.jit.save(net, "seq_multi_block_no_plugin.pth")
+            net = torch.jit.load("./seq_multi_block_no_plugin.pth")
 
     print("Running Network with plugin: ", use_plugin)
     for _ in range(10):
         start = time.time()
-        out = net(use_plugin, inputs)
+        out = net(inputs)
         torch.cuda.synchronize()
         print((time.time() - start) * 1000, "ms")
 
