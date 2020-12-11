@@ -1,5 +1,6 @@
 #!/bin/bash
 
+git clone https://github.com/yuki-koyama/hello-tbb-cmake.git --recursive
 rm -rf build;
 mkdir build;
 cd build
