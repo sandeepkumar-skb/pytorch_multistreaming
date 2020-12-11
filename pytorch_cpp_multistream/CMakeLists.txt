@@ -28,7 +28,7 @@ set_property(TARGET torch_cpu PROPERTY INTERFACE_COMPILE_OPTIONS "")
 include(ExternalProject)
 ExternalProject_Add(
 	tbb
-	GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/external/tbb
+	GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/hello-tbb-cmake/external/tbb
 	GIT_TAG master
 	INSTALL_DIR ${EXTERNAL_INSTALL_DIR}
 	CMAKE_ARGS
