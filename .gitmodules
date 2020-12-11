@@ -1,3 +1,6 @@
 [submodule "pytorch_cpp_multistream/pytorch_cpp_multistream/external/tbb"]
 	path = pytorch_cpp_multistream/pytorch_cpp_multistream/external/tbb
 	url = git@github.com:wjakob/tbb.git
+[submodule "pytorch_cpp_multistream/hello-tbb-cmake"]
+	path = pytorch_cpp_multistream/hello-tbb-cmake
+	url = git@github.com:yuki-koyama/hello-tbb-cmake.git
